@@ -1,6 +1,8 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
 
+var chosenProduct; // item that the customer wants
+
 // create the connection information for the sql database
 var connection = mysql.createConnection({
   host: "localhost",
@@ -23,7 +25,7 @@ connection.connect(function(err){
     start();
 });
 
-// This function should then prompt users with two messages.
+// This function prompts the user what item id they would like to purchase. Then it receives the items from the DB 
 function start() {
     inquirer
         .prompt(
@@ -33,76 +35,77 @@ function start() {
             type: "input",
             message: "Welcome to Bamazon!\n\nWhat is the ID of the product you would like to buy?"
         })
-       
         .then(function(answer) {
             connection.query(
                  
                 // SELECTS all products from: user's id input
                 "SELECT * FROM products WHERE ?",
                 {
-                    item_id: answer.item_id  
+                    item_id: answer.item_id
                 },
-                // if ID is not found, this message will show
-                function(err, results) { 
-                    if (err) throw err;
-
-                    if (results.length === 0) {
-                        console.log("No product found by this ID.");
-                        return;
-                    }
-                    
-                    var chosenProduct = results[0];
-
-                    // String = to number may cause a bug
-                    var product_name = chosenProduct.product_name;
-                    console.log("Product: " + product_name + " is available for purchase.\n");
-
-                    if(product_name = chosenProduct.stock_quantity) {
-                        console.log("Quantity of " + results[0].stock_quantity + " is available in stock.\n");
-                    }
-                    else {
-                        console.log("Insufficient quantity!")
-                    }
-                    
-                }
+                processResults
             )
         });
 }
-// if your store does have enough of the product, you should fulfill the customer's order.
-// This means updating the SQL database to reflect the remaining quantity.
-// Once the update goes through, show the customer the total cost of their purchase.
 
+// Function processes the user's item id. If no item id no. was found, it would print an error
+function processResults(err, results) { 
+    if (err) throw err;
 
-// This function asks how many units of the item they would like to buy
-// It receives the input that would then update the SQL database quantity
-function purchaseItem() {
+    if (results.length === 0) {
+        console.log("Opps! No product found by this ID.");
+        start();
+        return;
+    }
+    
+    chosenProduct = results[0]; 
+
+    var product_name = chosenProduct.product_name;
+    console.log("Product: " + product_name + " is available for purchase.\n");
+
+    if (chosenProduct.stock_quantity > 0) {
+        console.log("Quantity of " + chosenProduct.stock_quantity + " is available in stock.\n");
+        askForQuantity();
+    }
+    else {
+        console.log("Insufficient quantity!");
+        start();
+    }
+}
+
+function askForQuantity() {
     inquirer
     .prompt() (
     {
         // The second message should ask how many units of the product they would like to buy.
-        name: "stock_quanity",
+        name: "stock_quantity",
         type: "input",
         message: "How many units would you like to buy of this product?"
     })
-    .then(function(answer) {
-        if (answer.item_id === answer.chosenProduct) {
-            connection.query(
-                "UPDATE stock_quantity FROM products",
-                [
-                    {
-
-                    }
-                ]
-            )
-
-        }
-    })
+    .then(placeOrder);
 
 }
-// Once the customer has placed the order, 
-// your application should check if your store has enough 
-// of the product to meet the customer's request.
+// Once item_id and quantities are specified, this function will process the order
+function placeOrder(answer) {
+    if (answer.stock_quantity) {
+        connection.query(
+            // UPDATE SQL products table, SET changes in stock_quantity column, WHERE product id/name are located
+            "UPDATE products SET ? WHERE ?",
+            [
+                {
+                    // Stock_quantity column name: the item's quantity customer chose  - customer's desired quantity deducted. 
+                    // ex: stock_quantity: 100 - 5 = 95
+                    stock_quantity: chosenProduct.stock_quantity - answer.stock_quantity
+                },
+                {
+                    // parameter of item_id matches with the chosen product the customer desired
+                    item_id: chosenProduct.item_id
+                }
+            ]
+            
+        )
+    } else {
 
-
-// If not, the app should log a phrase like 'Insufficient quantity!', 
-// and then prevent the order from going through.
+    }
+    
+}
