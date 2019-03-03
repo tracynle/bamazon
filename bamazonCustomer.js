@@ -27,12 +27,14 @@ connection.connect(function(err){
 function displayProducts() {
     connection.query("SELECT * FROM products", function(err, results) {
         if (err) throw err;
+        console.log("\n     |     Bamazon Luxury Handbags     |    ");
+        // console.log("***~~~Bamazon Luxury Handbags~~~***")
         console.log("\nExisting Products:\n");
         for(var i = 0; i < results.length; i++) {
             var product = results[i];
-            console.log("Item ID: " + product.item_id + "-" + " Product Name: " + 
-            product.product_name + "," + " Department Name: " + product.department_name + "," + 
-            " Price: " + product.price + "," + " Stock Quantity: " + product.stock_quantity + "\n");
+            console.log("Item ID: " + product.item_id + " -" + " Product Name: " + 
+            product.product_name + " // " + " Department Name: " + product.department_name + " // " + 
+            " Price: $" + product.price + " // " + " Stock Quantity: " + product.stock_quantity + "\n");
         }
         start();
     });
@@ -45,7 +47,7 @@ function start() {
         {
         name: "item_id",
         type: "input",
-        message: "Welcome to Bamazon!\n\nWhat item would you like to purchase? Please enter the Item ID number.\n"
+        message: "Thank you for choosing Bamazon!\n\nWhat item would you like to purchase? Please enter the Item ID number.\n"
     })
     .then(function(answer) {
         connection.query(
@@ -65,7 +67,7 @@ function processResults(err, results) {
     if (err) throw err;
 
     if (results.length === 0) {
-        console.log("Opps! No product found by this ID.");
+        console.log("\n***Opps!***\nNo product was found by this ID. Please enter another Item ID number.\n");
         start();
         return;
     }
@@ -75,8 +77,8 @@ function processResults(err, results) {
     var product_name = chosenProduct.product_name;
     
     if (chosenProduct.stock_quantity > 0) {
-        console.log("Product: " + product_name + " is available for purchase.\n");
-        console.log("Quantity of " + chosenProduct.stock_quantity + " is available in stock.\n");
+        console.log("\nYou chose the " + product_name + ". It is available for purchase.\n");
+        console.log("There are " + chosenProduct.stock_quantity + " available in stock.\n");
         askForQuantity();
         
     }
@@ -87,22 +89,33 @@ function processResults(err, results) {
 }
 
 function askForQuantity() {
-    console.log("Quantity function:")
     inquirer
     .prompt (
+    {
+        name: "item_id",
+        type: "confirm",
+        message: "Would you like to purchase this item?"
+    },
     {
         // The second message should ask how many units of the product they would like to buy.
         name: "stock_quantity",
         type: "input",
-        message: "Please enter the quantity you would like to purchase."
+        message: "Please enter the number of items you would like to purchase."
     })
     .then(placeOrder);
+
+   
 }
 
 // Once item_id and quantities are specified, this function will process the order
 function placeOrder(answer) {
-    if (answer.stock_quantity) {
-        connection.query(
+    connection.query("SELECT * FROM products", function(err, results) {
+        if (err) throw err;
+
+        var itemConfirm =  answer.item_id;
+
+        if (answer.stock_quantity === itemConfirm) {
+            connection.query(
             // UPDATE SQL products table, SET changes in stock_quantity column, WHERE product id/name are located
             "UPDATE products SET ? WHERE ?",
             [
@@ -131,5 +144,6 @@ function placeOrder(answer) {
         console.log("Sorry, there's not enough product in stock. Your order cannot be placed.");
         console.log("Please modify your order.");
         processResults();
-    }
+        }
+    })
 };
