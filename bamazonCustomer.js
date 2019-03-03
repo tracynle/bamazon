@@ -28,7 +28,6 @@ function displayProducts() {
     connection.query("SELECT * FROM products", function(err, results) {
         if (err) throw err;
         console.log("\n     |     Bamazon Luxury Handbags     |    ");
-        // console.log("***~~~Bamazon Luxury Handbags~~~***")
         console.log("\nExisting Products:\n");
         for(var i = 0; i < results.length; i++) {
             var product = results[i];
@@ -58,7 +57,7 @@ function start() {
                 item_id: answer.item_id
             },
             processResults
-        )
+        );
     });
 }
 
@@ -92,19 +91,12 @@ function askForQuantity() {
     inquirer
     .prompt (
     {
-        name: "item_id",
-        type: "confirm",
-        message: "Would you like to purchase this item?"
-    },
-    {
         // The second message should ask how many units of the product they would like to buy.
         name: "stock_quantity",
         type: "input",
         message: "Please enter the number of items you would like to purchase."
     })
     .then(placeOrder);
-
-   
 }
 
 // Once item_id and quantities are specified, this function will process the order
@@ -112,38 +104,55 @@ function placeOrder(answer) {
     connection.query("SELECT * FROM products", function(err, results) {
         if (err) throw err;
 
-        var itemConfirm =  answer.item_id;
+        var itemConfirm =  answer.confirm_item;
+        console.log(answer);
 
-        if (answer.stock_quantity === itemConfirm) {
+        if (itemConfirm === false) {
+            displayProducts();
+            return;
+        }
+
+        if (answer.stock_quantity <= chosenProduct.stock_quantity) {
             connection.query(
-            // UPDATE SQL products table, SET changes in stock_quantity column, WHERE product id/name are located
-            "UPDATE products SET ? WHERE ?",
-            [
-                {
-                    // Stock_quantity column name: the item's quantity customer chose  - customer's desired quantity deducted. 
-                    // ex: stock_quantity: 100 - 5 = 95
-                    stock_quantity: chosenProduct.stock_quantity - answer.stock_quantity
-                    
-                },
-                {
-                    // parameter of item_id matches with the chosen product the customer desired
-                    item_id: chosenProduct.item_id
+                // UPDATE SQL products table, SET changes in stock_quantity column, WHERE product id/name are located
+                "UPDATE products SET ? WHERE ?",
+                [
+                    {
+                        // Stock_quantity column name: the item's quantity customer chose  - customer's desired quantity deducted. 
+                        // ex: stock_quantity: 100 - 5 = 95
+                        stock_quantity: chosenProduct.stock_quantity - answer.stock_quantity
+                    },
+                    {
+                        // parameter of item_id matches with the chosen product the customer desired
+                        item_id: chosenProduct.item_id
+                    }
+                ],
+                function(error) {
+                    if (error) throw err;
+                    console.log("\nYour order has been placed: \nYour total is: " + chosenProduct.price * answer.stock_quantity);
+                    console.log("Thank you for shopping at Bamazon!\n");
+
+                    inquirer.prompt(
+                        {
+                            name: "continueShopping",
+                            type:"confirm",
+                            message: "Do you wish to continue shopping?"
+                        }
+                        
+                    ).then(function(answer){
+                        if (answer.continueShopping === true) {
+                            start();
+                        } else {
+                            connection.end();
+                        }
+                    });
                 }
-            ],
-            function(error) {
-                if (error) throw err;
-                console.log("Your order has been placed: \nYour total is: " + chosenProduct.price * answer.stock_quantity);
-                console.log("Thank you for shopping at Bamazon!");
+            );
         
-                connection.end();                
-                start();
-            }
-        );
-        
-    } else {
-        console.log("Sorry, there's not enough product in stock. Your order cannot be placed.");
-        console.log("Please modify your order.");
-        processResults();
+        } else {
+            console.log("Sorry, there's not enough product in stock. Your order cannot be placed.");
+            console.log("Please modify your order.");
+            processResults();
         }
     })
 };
