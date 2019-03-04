@@ -1,5 +1,7 @@
 var mysql = require("mysql");
 var inquirer = require("inquirer");
+var Table = require('cli-table');
+
 
 var chosenProduct; 
 
@@ -21,23 +23,39 @@ var connection = mysql.createConnection({
 // connect to the mysql server and sql database
 connection.connect(function(err){
     if(err) throw err;   
+    // displayProducts();
     displayProducts();
 });
 
+// Cli-table to display products from MySQL
 function displayProducts() {
-    connection.query("SELECT * FROM products", function(err, results) {
+    connection.query("SELECT item_id, product_name, department_name, price, stock_quantity FROM products", function(err, results) {
         if (err) throw err;
-        console.log("\n                    |||             Bamazon            |||    ");
-        console.log("\nExisting Products:\n");
-        for(var i = 0; i < results.length; i++) {
-            var product = results[i];
-            console.log("Item ID: " + product.item_id + " -" + " Product Name: " + 
-            product.product_name + " // " + " Department Name: " + product.department_name + " // " + 
-            " Price: $" + product.price + " // " + " Stock Quantity: " + product.stock_quantity + "\n");
+      
+        console.log("\n                     ||              Bamazon              ||\n");
+        console.log("Existing Products:\n");
+        var table = new Table ( 
+          
+          {
+            head: ['item_id', 'product_name', 'department_name', 'price', 'stock_quantity\n'],
+            style: {
+                head: ['green'],
+                compact: false,
+                colAligns: ['center'],
+            }
+          }
+        );
+      
+        for (var i = 0; i < results.length; i++) {
+          table.push(
+            [results[i].item_id, results[i].product_name, results[i].department_name, results[i].price, results[i].stock_quantity]
+          );
         }
+        console.log(table.toString());
         start();
-    });
+    })
 }
+
 
 // This function prompts the user what item id they would like to purchase. Then it receives the items from the DB 
 function start() {
@@ -107,7 +125,7 @@ function placeOrder(answer) {
         var itemConfirm =  answer.confirm_item;
 
         if (itemConfirm === false) {
-            displayProducts();
+            // displayProducts();
             return;
         }
 
@@ -129,14 +147,14 @@ function placeOrder(answer) {
                 function(error) {
                     if (error) throw err;
                     
-                    console.log("\nYou've selected:");
-                    console.log("____________________________\n")
+                    console.log("____________________________")
+                    console.log("\nYou've selected:\n");
                     console.log("Item: " + chosenProduct.product_name + 
                         "\n" + "Department: " + chosenProduct.department_name + 
                         "\n" + "Price: $ " + chosenProduct.price + "\n" + 
                         "Quantity: " + answer.stock_quantity);
                     console.log("\nTotal: $" + chosenProduct.price * answer.stock_quantity + "\n");
-                    console.log("Your transaction is completed. Thank you!");
+                    console.log("Your transaction is completed.");
                     console.log("____________________________")
                     console.log("\nThank you for shopping at Bamazon!\n");
 
@@ -148,8 +166,9 @@ function placeOrder(answer) {
                         }
                         
                     ).then(function(answer){
-                        if (answer.continueShopping === true) {
-                            start();
+                        if (answer.continueShopping === true) {   
+                            displayProducts();                         
+
                         } else {
                             console.log("\nThank you for shopping with us!\nHave a great day.\n")
                             connection.end();
