@@ -27,7 +27,7 @@ connection.connect(function(err){
 function displayProducts() {
     connection.query("SELECT * FROM products", function(err, results) {
         if (err) throw err;
-        console.log("\n     |     Bamazon Luxury Handbags     |    ");
+        console.log("\n                    |||             Bamazon            |||    ");
         console.log("\nExisting Products:\n");
         for(var i = 0; i < results.length; i++) {
             var product = results[i];
@@ -76,8 +76,8 @@ function processResults(err, results) {
     var product_name = chosenProduct.product_name;
     
     if (chosenProduct.stock_quantity > 0) {
-        console.log("\nYou chose the " + product_name + ". It is available for purchase.\n");
-        console.log("There are " + chosenProduct.stock_quantity + " available in stock.\n");
+        console.log("\nYou chose: " + product_name);
+        console.log(chosenProduct.stock_quantity + " are in stock.\n");
         askForQuantity();
         
     }
@@ -94,7 +94,7 @@ function askForQuantity() {
         // The second message should ask how many units of the product they would like to buy.
         name: "stock_quantity",
         type: "input",
-        message: "Please enter the number of items you would like to purchase."
+        message: "Please enter the number of items you would like to purchase.\n"
     })
     .then(placeOrder);
 }
@@ -105,7 +105,6 @@ function placeOrder(answer) {
         if (err) throw err;
 
         var itemConfirm =  answer.confirm_item;
-        console.log(answer);
 
         if (itemConfirm === false) {
             displayProducts();
@@ -129,20 +128,30 @@ function placeOrder(answer) {
                 ],
                 function(error) {
                     if (error) throw err;
-                    console.log("\nYour order has been placed: \nYour total is: " + chosenProduct.price * answer.stock_quantity);
-                    console.log("Thank you for shopping at Bamazon!\n");
+                    
+                    console.log("\nYou've selected:");
+                    console.log("____________________________\n")
+                    console.log("Item: " + chosenProduct.product_name + 
+                        "\n" + "Department: " + chosenProduct.department_name + 
+                        "\n" + "Price: $ " + chosenProduct.price + "\n" + 
+                        "Quantity: " + answer.stock_quantity);
+                    console.log("\nTotal: $" + chosenProduct.price * answer.stock_quantity + "\n");
+                    console.log("Your transaction is completed. Thank you!");
+                    console.log("____________________________")
+                    console.log("\nThank you for shopping at Bamazon!\n");
 
                     inquirer.prompt(
                         {
                             name: "continueShopping",
                             type:"confirm",
-                            message: "Do you wish to continue shopping?"
+                            message: "Do you wish to continue shopping?\n"
                         }
                         
                     ).then(function(answer){
                         if (answer.continueShopping === true) {
                             start();
                         } else {
+                            console.log("\nThank you for shopping with us!\nHave a great day.\n")
                             connection.end();
                         }
                     });
@@ -150,8 +159,8 @@ function placeOrder(answer) {
             );
         
         } else {
-            console.log("Sorry, there's not enough product in stock. Your order cannot be placed.");
-            console.log("Please modify your order.");
+            console.log("Sorry, there's not enough product in stock. Your order cannot be placed.\n");
+            console.log("Please modify your order.\n");
             processResults();
         }
     })

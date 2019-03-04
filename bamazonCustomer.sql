@@ -14,15 +14,15 @@ CREATE TABLE products (
 -- Mock data 
 INSERT INTO products (product_name, department_name, price, stock_quantity)
 VALUES 
-("Prada tote", "tote bag", 950, 1000), 
-("Gucci canvas tote", "tote bag", 2200, 1000),
-("Fendi Peekaboo tote", "tote bag", 6500, 1000), 
-("The Row crossbody", "crossbody", 2690, 550),
-("Mansur Gavriel", "bucket bag", 395, 150),
-("Chloé Marcie", "tote bag", 1990, 300),
-("Givenchy mini", "bucket bag", 1590, 910),
-("Saint Laurent", "bucket bag", 1290, 610),
-("Proenza Schouler", "crossbody", 896, 615),
-("Miu Miu Grace", "shoulder bag", 1490, 550);
+("Indoor Slippers", "shoes", 15, 1000), 
+("Canvas tote bag", "handbags", 22, 1000),
+("Marc Jacobs tote bag", "handbags", 650, 1000), 
+("iPhone x phone case", "accessories", 26, 550),
+("Bodum Coffee French Press", "kitchen ware", 39, 150),
+("Knitted Scarf", "accessories", 40, 300),
+("Midori Traveler's Notebook", "notebooks", 55, 910),
+("Strasthmore Sketchbook", "art supplies", 15, 610),
+("Study Desk", "furniture", 200, 615),
+("Vitruvi Stone Diffuser", "diffuser", 115, 550);
 
 SELECT * FROM products;
