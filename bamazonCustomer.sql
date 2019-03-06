@@ -25,4 +25,4 @@ VALUES
 ("Study Desk", "furniture", 200, 615),
 ("Vitruvi Stone Diffuser", "diffuser", 115, 550);
 
-SELECT * FROM products;
+SELECT DISTINCT department_name FROM products;
