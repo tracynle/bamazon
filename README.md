@@ -6,11 +6,18 @@ Bamazon is a CLI node application that is an Amazon-like storefront that uses In
 Follow the instructions and happy shopping!
 
 ### Instructions:
-1. Before you start shopping, be sure to copy this into your terminal: `git clone git@github.com:tracynle/bamazon.git`
+1. Before you start shopping, be sure to copy and paste this into your terminal: `git clone git@github.com:tracynle/bamazon.git`
 2. Next, install all the dependencies you need in order to run Bamazon in the terminal by typing in: `npm install`
 
 3. After the npm is installed, type in `node bamazonCustomer.js` in CLI to initate your shopping experience. 
-4. You will be prompted a few questions, and that's it! 
+
+![Screenshot](/screenshots/screenshot1.png)
+
+4. You will be prompted a few questions.
+
+5. After selecting an item, Bamazon will calculate your quantity of items and the database is updates your cart by showing your total.
+
+![Screenshot](/screenshots/screenshot2.png)
 
 ### Built With
 * MySQL
@@ -20,3 +27,4 @@ Follow the instructions and happy shopping!
     * mysql
     * prompt
     * cli-table
+    * inquirer
