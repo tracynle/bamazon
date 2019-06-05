@@ -15,7 +15,7 @@ Follow the instructions and happy shopping!
 
 4. You will be prompted a few questions.
 
-5. After selecting an item, Bamazon will calculate your quantity of items and the database is updates your cart by showing your total.
+5. After selecting an item, Bamazon will calculate your quantity of items and the database updates your cart by showing your total.
 
 ![Screenshot](/screenshots/screenshot2.png)
 
